@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat</title>
+        <style type="text/css">
+            input { display: block; }
+            ul { list-style: none; }
+            
+        </style>
+    </head>
+    <body>
+        <ul id="messages">
+            
+        </ul>
+        <form id="chatbox">
+            <textarea></textarea>
+            <input type="submit" value="Send" />
+        </form>
+        
+        
+        <script
+          src="https://code.jquery.com/jquery-3.1.1.min.js"
+          integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+          crossorigin="anonymous"></script>
+          <script>
+              $(function(){
+                  var socket = null;
+                  var msgBox = $("#chatbox textarea");
+                  var messages = $("#messages");
+                  
+                  $("#chatbox").submit(function(){
+                      if (!msgBox.val()) return false;
+                      if (!socket) {
+                          alert("Error: There is no socket connection.");
+                          return false;
+                      }
+                      socket.send(msgBox.val());
+                      msgBox.val("");
+                      return false;
+                  });
+                  if (!window["WebSocket"]) {
+                      alert("Error: Your browser does not support websockets.")
+                  } else {
+                      var loc = window.location, new_uri;
+                            if (loc.protocol === "https:") {
+                                new_uri = "ws:";
+                            } else {
+                                new_uri = "wss:";
+                            }
+                            new_uri += "//" + loc.host;
+                            new_uri += loc.pathname + "rooms";
+                      socket = new WebSocket(new_uri);
+                      socket.onclose = function() {
+                          alert("Connection has been closed");
+                      }
+                      socket.onmessage = function(e) {
+                          alert("Connected");
+                          messages.append($("<li>").text(e.data));
+                      }
+                  }
+              });
+          </script>
+    </body>
+</html>
